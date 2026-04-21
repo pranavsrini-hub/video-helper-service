@@ -6,7 +6,7 @@ import uuid
 from openai import OpenAI
 
 app = FastAPI()
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI()
 
 
 class VideoRequest(BaseModel):
