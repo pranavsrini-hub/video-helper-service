@@ -24,7 +24,24 @@ def ping():
 
 @app.post("/transcribe")
 def transcribe_video(data: VideoRequest):
-    return {
-        "status": "received",
-        "youtube_url": data.youtube_url
-    }
+    try:
+        ydl_opts = {
+            "quiet": True,
+            "noplaylist": True,
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(data.youtube_url, download=False)
+
+        return {
+            "status": "metadata_ok",
+            "youtube_url": data.youtube_url,
+            "title": info.get("title"),
+            "duration_seconds": info.get("duration")
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
