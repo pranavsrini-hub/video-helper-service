@@ -1,37 +1,23 @@
-@app.post("/transcribe")
-def transcribe_video(data: VideoRequest):
-    try:
-        os.makedirs("audio", exist_ok=True)
+from fastapi import FastAPI
+from pydantic import BaseModel
+import yt_dlp
+import os
+import uuid
+from openai import OpenAI
 
-        file_id = str(uuid.uuid4())
-        output_template = f"audio/{file_id}.%(ext)s"
+app = FastAPI()
+client = OpenAI()
 
-        ydl_opts = {
-            "format": "bestaudio/best",
-            "outtmpl": output_template,
-            "noplaylist": True,
-            "quiet": True,
-        }
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(data.youtube_url, download=True)
-            downloaded_file = ydl.prepare_filename(info)
+class VideoRequest(BaseModel):
+    youtube_url: str
 
-        with open(downloaded_file, "rb") as audio_file:
-            transcript = client.audio.transcriptions.create(
-                model="gpt-4o-mini-transcribe",
-                file=audio_file
-            )
 
-        return {
-            "status": "transcribed",
-            "youtube_url": data.youtube_url,
-            "audio_file": downloaded_file,
-            "transcript": transcript.text
-        }
+@app.get("/")
+def home():
+    return {"message": "video helper service is alive"}
 
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e)
-        }
+
+@app.get("/ping")
+def ping():
+    return {"status": "ok"}
