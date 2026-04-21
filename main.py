@@ -21,3 +21,10 @@ def home():
 @app.get("/ping")
 def ping():
     return {"status": "ok"}
+
+@app.post("/transcribe")
+def transcribe_video(data: VideoRequest):
+    return {
+        "status": "received",
+        "youtube_url": data.youtube_url
+    }
